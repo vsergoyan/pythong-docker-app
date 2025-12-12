@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - name: consumer
+        image: vsergoyan/task-reminder-consumer:latest
+        command: ["python", "consumer.py"]
+        env:
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_NAME
+          value: "appdb"
+        - name: DB_USER
+          value: "appuser"
+        - name: DB_PASS
+          value: "apppass"
+        - name: RABBITMQ_HOST
+          value: "rabbitmq"

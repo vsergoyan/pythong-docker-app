@@ -1,0 +1,45 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=appdb
+      - DB_USER=appuser
+      - DB_PASS=apppass
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  consumer:
+    build: .
+    command: python consumer.py
+    environment:
+      - DB_HOST=db
+      - DB_NAME=appdb
+      - DB_USER=appuser
+      - DB_PASS=apppass
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
